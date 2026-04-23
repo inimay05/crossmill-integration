@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m crossmill.memory.classifier)",
+      "Bash(python -m crossmill.memory.store)",
+      "Bash(python -m crossmill.memory.retriever)",
+      "Bash(python -m crossmill.memory)",
+      "Bash(python -c ' *)"
+    ]
+  }
+}
