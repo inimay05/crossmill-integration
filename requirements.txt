@@ -1,2 +1,2 @@
-gradio>=4.44.0,<5.0.0
 pandas
+huggingface_hub<0.25.0
