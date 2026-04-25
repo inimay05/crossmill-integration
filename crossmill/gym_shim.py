@@ -4,7 +4,7 @@ from gymnasium import spaces
 from crossmill.platform import CrossMillPlatform
 from crossmill.memory_interface import NoOpMemory
 from crossmill.config import ENVIRONMENTS, AUGMENTED_OBS_DIM
-
+from crossmill.training_config import STRATEGY_DIM
 
 class CrossMillGymShim(gym.Env):
     """
@@ -71,6 +71,7 @@ class CrossMillGymShim(gym.Env):
         )
 
         self._last_obs = None
+        self.strategy_bias = np.zeros(STRATEGY_DIM, dtype=np.float32)
 
     def reset(self, seed=None, options=None):
         """
@@ -81,7 +82,9 @@ class CrossMillGymShim(gym.Env):
             self.seed_val = seed
         obs = self.platform.reset(self.env_name, seed=self.seed_val)
         self._last_obs = obs
-        return obs.astype(np.float32), {}
+        augmented = np.concatenate([obs, self.strategy_bias]).astype(np.float32)
+        self._last_obs = augmented
+        return augmented, {}
 
     def step(self, action):
         """
@@ -98,6 +101,13 @@ class CrossMillGymShim(gym.Env):
         info       = result['info']
         self._last_obs = obs
         return obs, reward, terminated, truncated, info
+
+    def update_strategy(self, strategy_bias):
+        self.strategy_bias = np.clip(
+            strategy_bias.astype(np.float32), -1.0, 1.0
+        )
+
+
 
     def render(self):
         pass

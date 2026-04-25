@@ -76,3 +76,5 @@ if __name__ == '__main__':
     print('QUALITY_THRESHOLDS:', QUALITY_THRESHOLDS)
     print()
     print('training_config OK')
+STRATEGY_DIM = 4
+STRATEGY_UPDATE_INTERVAL = 256

@@ -33,8 +33,8 @@ BIAS_VECTOR_DIM = 8
 # Original obs dim + bias vector dim. The policy network ALWAYS sees this size,
 # even when memory is explicitly set to None (bias vector is zeros in that case).
 AUGMENTED_OBS_DIM = {
-    'safenutri': 15 + BIAS_VECTOR_DIM,   # = 23
-    'megaforge': 18 + BIAS_VECTOR_DIM,   # = 26
+    'safenutri': 27,
+    'megaforge': 30,
 }
 
 # ---- DEFAULT MEMORY CONFIGURATION ----

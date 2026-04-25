@@ -91,7 +91,8 @@ def augment_observation(
 
     augmented = np.concatenate([raw_vector, bias])
 
-    expected_aug = config.AUGMENTED_OBS_DIM[env_name]
+    from crossmill.training_config import STRATEGY_DIM
+    expected_aug = config.AUGMENTED_OBS_DIM[env_name] - STRATEGY_DIM
     assert augmented.shape[0] == expected_aug, (
         f'Augmented vector has {augmented.shape[0]} dims, '
         f'expected {expected_aug}'
