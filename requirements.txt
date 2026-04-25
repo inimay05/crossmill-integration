@@ -1,2 +1,2 @@
 pandas
-huggingface_hub<0.25.0
+huggingface_hub>=0.25.1,<0.26.0
