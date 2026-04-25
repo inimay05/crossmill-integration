@@ -1,39 +1,100 @@
-# CrossMill — Integration Layer
+---
+title: CrossMill
+emoji: 🏭
+colorFrom: blue
+colorTo: green
+sdk: gradio
+sdk_version: "5.0.0"
+app_file: app.py
+pinned: true
+---
 
-**Cross-Industry RL Platform · Unified Entry Point · Active Memory Layer**
+# CrossMill — Cross-Industry RL Platform
+
+**Teaching Steel to Learn from Juice**
 
 CrossMill is a cross-industry reinforcement learning platform that connects
-two POMDP industrial environments — SafeNutri (orange juice pasteurization)
-and MegaForge (blast furnace steel production) — through a shared
-CrossIndustryMemory layer that enables knowledge transfer between them.
+two production-fidelity POMDP industrial environments —
+**SafeNutri** (orange juice pasteurisation) and **MegaForge** (blast furnace steelmaking) —
+through a shared `CrossIndustryMemory` layer that enables genuine knowledge
+transfer between unrelated manufacturing sectors.
 
-The integration layer is the single entry point for training, evaluation,
-and demo. It wires both environments and the memory layer together
-without modifying either environment's internals.
+The central insight is structural isomorphism: Vitamin C degradation and
+refractory wear obey the same physics. Temperature ramp control in a
+pasteuriser and blast temperature control in a furnace are the same
+optimisation problem at different scales. A policy that learns one already
+knows something about the other.
 
-Part of the CrossMill family, built for the OpenEnv AI Hackathon 2026
-(Meta x Scaler School of Technology).
+Built for the **OpenEnv AI Hackathon 2026** · Meta × Scaler School of Technology.
 
-## Key Design Decisions
+---
 
-- Memory is active by default. CrossMillPlatform() with no arguments
-  instantiates a fully configured CrossIndustryMemory with mode='cross' and
-  bidirectional transfer on. Passing memory=None uses NoOpMemory (zero bias)
-  for experimental baselines.
-- Environments are untouched. The integration layer interacts with SafeNutri
-  and MegaForge exclusively through their public OpenEnv interfaces.
-- Observation augmentation is always on. The policy network always sees 23-dim
-  (SafeNutri) or 26-dim (MegaForge). When memory is disabled, the bias vector
-  is zeros. The observation dimension is identical across all memory modes.
-- Config is the single source of truth. All platform-level constants live in
-  crossmill/config.py.
+## What's in this Space
 
-## Quick Start
+| Tab | Contents |
+|---|---|
+| 🏭 CrossMill Story | Interactive story-driven landing page explaining the platform |
+| 📊 Results Dashboard | Live training results table + reward curves (populated after training) |
 
-    cd crossmill-integration
-    source venv/bin/activate
-    python -m tests.test_platform
+---
+
+## Key Technical Contributions
+
+- **Two physics-accurate Gymnasium environments** — SafeNutri (15-dim state, 8 actions,
+  Arrhenius kinetics, FDA constraints) and MegaForge (18-dim state, 10 actions,
+  blast thermochemistry, ±0.05% carbon target)
+- **CrossIndustryMemory** — episodic → semantic promotion with confidence-gated
+  cross-domain retrieval (`0.7 × cosine_similarity + 0.3 × confidence`)
+- **Three memory modes** — `none` / `local` / `cross` for clean ablation
+- **Hierarchical dual-agent** — Qwen2.5-3B LLM as plant manager feeds
+  `strategy_bias` into RecurrentPPO + LSTM controller
+- **Anti-reward-hacking flags** — `SAFETY_WARNING`, `CATASTROPHIC_FAIL`,
+  `QUALITY_LOW`, `HIGH_VARIANCE`, `COMPOUND_FAIL`
+- **Transfer gain metric** — `(R_cross − R_none) / |R_none|` as primary
+  cross-industry evaluation signal
+
+---
+
+## Environments
+
+### 🍊 SafeNutri — OJ Pasteurisation
+
+| Property | Value |
+|---|---|
+| State dimensions | 15 |
+| Action dimensions | 8 |
+| Thermal model | Arrhenius kinetics |
+| Safety constraint | FDA §21 CFR pathogen kill |
+| Optimisation target | Vitamin C retention |
+| POMDP | Partial obs, delayed sensors, noise |
+| Difficulty | Easy / Medium / Hard |
+
+### 🏭 MegaForge — Blast Furnace Steelmaking
+
+| Property | Value |
+|---|---|
+| State dimensions | 18 |
+| Action dimensions | 10 |
+| Carbon target | 4.2% ± 0.05% |
+| Equipment value | $500M |
+| Safety constraint | Thermal stress / refractory wear |
+| POMDP | Partial obs, delayed sensors |
+| Difficulty | Easy / Medium / Hard |
+
+---
+
+## Structural Isomorphism
+
+| SafeNutri | MegaForge |
+|---|---|
+| Vitamin C degradation | Refractory wear |
+| Temperature ramp control | Blast temperature control |
+| FDA pathogen-kill limit | Thermal stress limit |
+| Flow rate & pressure | Production throughput |
+| Arrhenius kinetics | Blast thermochemistry |
+
+---
 
 ## License
 
-MIT
+Apache 2.0

@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrossMill — Cross-Industry Reinforcement Learning Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:        #1B4F72;
+      --blue:        #2E86C1;
+      --green:       #1E8449;
+      --orange:      #D35400;
+      --white:       #FFFFFF;
+      --off-white:   #F2F3F4;
+      --dark-bg:     #0D1B2A;
+      --dark-card:   #112233;
+      --dark-border: #1E3A5F;
+      --muted:       #7F8C9B;
+      --text:        #E8EDF2;
+      --text-dim:    #A8B9CA;
+      --red:         #C0392B;
+      --yellow:      #F39C12;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark-bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ─── NAV ─────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: rgba(13, 27, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .nav-brand {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      background: linear-gradient(90deg, var(--blue), #5DADE2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--white); }
+
+    /* ─── SECTION SCAFFOLD ────────────────────────────────── */
+    section {
+      padding: 6rem 2.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 0.75rem;
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+    }
+
+    p { color: var(--text-dim); max-width: 68ch; }
+
+    /* fade-up animation */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── HERO ────────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      padding: 0;
+      max-width: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #0D1B2A 0%, #1B4F72 35%, #0D2137 65%, #0A1628 100%);
+      z-index: 0;
+    }
+
+    /* animated gradient orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      animation: drift 8s ease-in-out infinite alternate;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, #2E86C1, transparent 70%);
+      top: -10%; left: -5%;
+      animation-delay: 0s;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #1E8449, transparent 70%);
+      bottom: 5%; right: 0%;
+      animation-delay: -3s;
+    }
+    .orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, #D35400, transparent 70%);
+      top: 60%; left: 50%;
+      animation-delay: -5s;
+    }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(30px, -40px) scale(1.12); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      padding: 2rem;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--blue);
+      border: 1px solid rgba(46, 134, 193, 0.4);
+      border-radius: 20px;
+      padding: 0.3rem 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: clamp(3.5rem, 10vw, 7rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      background: linear-gradient(135deg, #FFFFFF 40%, #5DADE2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      font-weight: 300;
+      color: var(--text-dim);
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-subtitle em {
+      font-style: normal;
+      color: #5DADE2;
+    }
+
+    .hero-desc {
+      font-size: 1rem;
+      color: var(--text-dim);
+      max-width: 58ch;
+      margin: 0 auto 2.5rem;
+      line-height: 1.8;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--blue);
+      color: white;
+      padding: 0.85rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .hero-cta:hover {
+      background: #1a6ea0;
+      transform: translateY(-2px);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* ─── DIVIDER ─────────────────────────────────────────── */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--dark-border), transparent);
+      margin: 0 auto;
+      max-width: 1100px;
+      padding: 0 2.5rem;
+    }
+
+    /* ─── PROBLEM ─────────────────────────────────────────── */
+    #problem { background: none; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .stat-card {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--blue);
+      border-radius: 2px;
+    }
+
+    .stat-card:hover {
+      border-color: var(--blue);
+      transform: translateY(-3px);
+    }
+
+    .stat-number {
+      font-size: 2.4rem;
+      font-weight: 900;
+      color: var(--blue);
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.95rem;
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-desc {
+      font-size: 0.83rem;
+      color: var(--text-dim);
+    }
+
+    /* ─── ENVIRONMENTS ────────────────────────────────────── */
+    #environments { }
+
+    .env-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 700px) {
+      .env-grid { grid-template-columns: 1fr; }
+      nav .nav-links { display: none; }
+    }
+
+    .env-card {
+      border-radius: 16px;
+      padding: 2rem;
+      border: 1px solid;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s;
+    }
+
+    .env-card:hover { transform: translateY(-4px); }
+
+    .env-card.safenurti {
+      background: linear-gradient(145deg, rgba(30, 132, 73, 0.12), rgba(30, 132, 73, 0.04));
+      border-color: rgba(30, 132, 73, 0.5);
+    }
+
+    .env-card.megaforge {
+      background: linear-gradient(145deg, rgba(211, 84, 0, 0.12), rgba(211, 84, 0, 0.04));
+      border-color: rgba(211, 84, 0, 0.5);
+    }
+
+    .env-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .env-name {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.3rem;
+    }
+
+    .safenurti .env-name { color: #2ECC71; }
+    .megaforge .env-name { color: #E67E22; }
+
+    .env-domain {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+
+    .safenurti .env-domain { color: rgba(46, 204, 113, 0.7); }
+    .megaforge .env-domain { color: rgba(230, 126, 34, 0.7); }
+
+    .env-specs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .spec-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .spec-key { color: var(--text-dim); }
+    .spec-val { color: var(--text); font-weight: 600; font-family: 'Courier New', monospace; }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.7rem;
+      border-radius: 20px;
+    }
+
+    .badge.easy   { background: rgba(46,204,113,0.15);  color: #2ECC71; border: 1px solid rgba(46,204,113,0.3); }
+    .badge.medium { background: rgba(243,156,18,0.15);  color: #F39C12; border: 1px solid rgba(243,156,18,0.3); }
+    .badge.hard   { background: rgba(231,76,60,0.15);   color: #E74C3C; border: 1px solid rgba(231,76,60,0.3); }
+    .badge.pomdp  { background: rgba(46,134,193,0.15);  color: #5DADE2; border: 1px solid rgba(46,134,193,0.3); }
+    .badge.feature{ background: rgba(255,255,255,0.07); color: var(--text-dim); border: 1px solid var(--dark-border); }
+
+    .env-highlight {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      padding: 0.8rem;
+      background: rgba(255,255,255,0.04);
+      border-radius: 8px;
+    }
+
+    /* ─── ISOMORPHISM ─────────────────────────────────────── */
+    #novel { }
+
+    .iso-container {
+      margin-top: 3rem;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .iso-header {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 1.2rem 2rem;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .iso-col-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .iso-col-label.green { color: #2ECC71; }
+    .iso-col-label.orange { color: #E67E22; }
+    .iso-col-label.center { color: var(--blue); text-align: center; }
+
+    .iso-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--dark-border);
+      transition: background 0.2s;
+    }
+
+    .iso-row:last-child { border-bottom: none; }
+    .iso-row:hover { background: rgba(46, 134, 193, 0.06); }
+
+    .iso-cell {
+      font-size: 0.88rem;
+    }
+
+    .iso-cell.left {
+      color: #2ECC71;
+      font-weight: 500;
+    }
+
+    .iso-cell.right {
+      color: #E67E22;
+      font-weight: 500;
+      text-align: right;
+    }
+
+    .iso-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 1.5rem;
+      color: var(--blue);
+      font-size: 1rem;
+    }
+
+    .arrow-animated {
+      display: inline-block;
+      animation: pulse-arrow 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse-arrow {
+      0%, 100% { opacity: 1;   transform: scaleX(1); }
+      50%       { opacity: 0.4; transform: scaleX(0.7); }
+    }
+
+    .iso-caption {
+      padding: 1rem 2rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: rgba(255,255,255,0.02);
+      border-top: 1px solid var(--dark-border);
+      text-align: center;
+    }
+
+    /* ─── MEMORY ──────────────────────────────────────────── */
+    #memory { }
+
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+      margin-top: 2.5rem;
+    }
+
+    .memory-mode {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: transform 0.3s, border-color 0.3s;
+    }
+
+    .memory-mode:hover {
+      transform: translateY(-3px);
+      border-color: var(--blue);
+    }
+
+    .memory-mode-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .memory-mode-name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      color: var(--white);
+    }
+
+    .memory-mode-desc {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .state-dims {
+      margin-top: 2.5rem;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      padding: 1.8rem;
+    }
+
+    .state-dims h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      color: var(--blue);
+    }
+
+    .dims-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .dim-chip {
+      background: rgba(46, 134, 193, 0.1);
+      border: 1px solid rgba(46, 134, 193, 0.25);
+      border-radius: 8px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.78rem;
+      color: #5DADE2;
+      font-weight: 500;
+    }
+
+    .formula-box {
+      margin-top: 2rem;
+      background: rgba(46, 134, 193, 0.08);
+      border: 1px solid rgba(46, 134, 193, 0.3);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .formula-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 0.8rem;
+    }
+
+    .formula-text {
+      font-family: 'Courier New', monospace;
+      font-size: 1.05rem;
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    .formula-text .coeff { color: #5DADE2; }
+    .formula-text .fn    { color: #2ECC71; }
+
+    .promo-flow {
+      margin-top: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+    }
+
+    .promo-step {
+      text-align: center;
+    }
+
+    .promo-step-icon {
+      font-size: 1.6rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .promo-step-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .promo-step-sub {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+    }
+
+    .promo-arrow {
+      color: var(--blue);
+      font-size: 1.2rem;
+      opacity: 0.6;
+    }
+
+    /* ─── ARCHITECTURE ────────────────────────────────────── */
+    #architecture { }
+
+    .arch-diagram {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 700px) {
+      .arch-diagram { grid-template-columns: 1fr; }
+    }
+
+    .arch-agent {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 14px;
+      padding: 1.8rem;
+    }
+
+    .arch-agent-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .arch-agent-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 0.3rem;
+      color: var(--white);
+    }
+
+    .arch-agent-model {
+      font-size: 0.78rem;
+      font-family: 'Courier New', monospace;
+      color: var(--blue);
+      margin-bottom: 1rem;
+    }
+
+    .arch-features {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .arch-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .arch-feature-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--blue);
+      margin-top: 0.4rem;
+      flex-shrink: 0;
+    }
+
+    .arch-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .conn-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--blue);
+      text-align: center;
+      letter-spacing: 0.08em;
+    }
+
+    .conn-line {
+      width: 2px;
+      height: 60px;
+      background: linear-gradient(180deg, var(--blue), rgba(46,134,193,0));
+    }
+
+    .conn-arrow-right {
+      font-size: 1.2rem;
+      color: var(--blue);
+    }
+
+    .obs-table {
+      margin-top: 2rem;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .obs-table table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+
+    .obs-table th {
+      padding: 0.75rem 1.2rem;
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .obs-table td {
+      padding: 0.7rem 1.2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text-dim);
+    }
+
+    .obs-table tr:last-child td { border-bottom: none; }
+
+    .obs-table td:first-child { color: var(--text); font-weight: 600; }
+
+    .obs-table .num {
+      font-family: 'Courier New', monospace;
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    /* ─── ANTI-HACKING ────────────────────────────────────── */
+    #antihack { }
+
+    .flags-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin-top: 2.5rem;
+    }
+
+    .flag-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      transition: border-color 0.2s;
+    }
+
+    .flag-row:hover { border-color: rgba(46,134,193,0.4); }
+
+    .flag-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      min-width: 160px;
+      text-align: center;
+    }
+
+    .flag-badge.orange-flag { background: rgba(211,84,0,0.15); color: #E67E22; border: 1px solid rgba(211,84,0,0.4); }
+    .flag-badge.red-flag    { background: rgba(192,57,43,0.15); color: #E74C3C; border: 1px solid rgba(192,57,43,0.4); }
+    .flag-badge.yellow-flag { background: rgba(243,156,18,0.15); color: #F39C12; border: 1px solid rgba(243,156,18,0.4); }
+
+    .flag-desc {
+      font-size: 0.83rem;
+      color: var(--text-dim);
+    }
+
+    .transfer-formula {
+      margin-top: 2.5rem;
+      background: linear-gradient(135deg, rgba(27,79,114,0.3), rgba(30,132,73,0.15));
+      border: 1px solid rgba(46,134,193,0.4);
+      border-radius: 14px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .transfer-formula .f-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 0.8rem;
+    }
+
+    .transfer-formula .f-eq {
+      font-family: 'Courier New', monospace;
+      font-size: 1.1rem;
+      color: var(--white);
+      font-weight: 700;
+      line-height: 2;
+    }
+
+    .transfer-formula .f-eq .hl-blue   { color: #5DADE2; }
+    .transfer-formula .f-eq .hl-green  { color: #2ECC71; }
+    .transfer-formula .f-eq .hl-orange { color: #E67E22; }
+
+    .transfer-formula .f-caption {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-top: 0.75rem;
+    }
+
+    /* ─── FOOTER ──────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--dark-border);
+      padding: 3rem 2.5rem;
+      text-align: center;
+    }
+
+    .footer-event {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-event span { color: var(--blue); }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--white); }
+
+    .footer-copy {
+      margin-top: 2rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* ─── QUOTE BLOCK ─────────────────────────────────────── */
+    .pull-quote {
+      border-left: 3px solid var(--blue);
+      margin: 2.5rem 0;
+      padding: 1.2rem 1.8rem;
+      background: rgba(46, 134, 193, 0.06);
+      border-radius: 0 10px 10px 0;
+    }
+
+    .pull-quote p {
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--text);
+      max-width: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ NAV ═══════════════════════════════════ -->
+<nav>
+  <span class="nav-brand">CROSSMILL</span>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#environments">Environments</a></li>
+    <li><a href="#novel">Isomorphism</a></li>
+    <li><a href="#memory">Memory</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════════ HERO ══════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-tag">OpenEnv AI Hackathon 2026</div>
+    <h1>CrossMill</h1>
+    <div class="hero-subtitle">Teaching Steel to Learn from <em>Juice</em></div>
+    <p class="hero-desc">
+      A cross-industry reinforcement learning platform connecting orange juice
+      pasteurisation and blast furnace steelmaking through shared memory —
+      because the physics of heat transfer doesn't care which industry you're in.
+    </p>
+    <a href="#problem" class="hero-cta">
+      Explore the Platform ↓
+    </a>
+  </div>
+  <div class="scroll-hint">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M8 3v10M3 9l5 4 5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Scroll
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ PROBLEM ═══════════════════════════════ -->
+<section id="problem">
+  <div class="fade-up">
+    <div class="section-label">The Problem</div>
+    <h2>Manufacturing AI is stuck in the past</h2>
+    <p>
+      The world's largest industry runs on controllers designed before the moon landing.
+      Safe experimentation is impossible, simulation infrastructure is siloed, and
+      hard-won knowledge never crosses industry boundaries.
+    </p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card fade-up">
+      <div class="stat-number">$13T</div>
+      <div class="stat-label">Global manufacturing output</div>
+      <div class="stat-desc">Still largely controlled by PID controllers first formalised in the 1960s — no learning, no adaptation.</div>
+    </div>
+    <div class="stat-card fade-up" style="--delay:0.1s">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Real-factory experiments allowed</div>
+      <div class="stat-desc">You cannot let an AI freely explore a blast furnace valued at $500M or a food-safety-critical pasteuriser.</div>
+    </div>
+    <div class="stat-card fade-up" style="--delay:0.2s">
+      <div class="stat-number">∞×</div>
+      <div class="stat-label">Duplicate simulation effort</div>
+      <div class="stat-desc">Every team rebuilds the same physics-based simulators from scratch. There is no common language between industries.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ ENVIRONMENTS ══════════════════════════ -->
+<section id="environments">
+  <div class="fade-up">
+    <div class="section-label">The Two Environments</div>
+    <h2>Two industries, one shared challenge</h2>
+    <p>
+      CrossMill ships two production-fidelity Gymnasium environments modelling
+      real industrial processes at full physical complexity.
+    </p>
+  </div>
+
+  <div class="env-grid fade-up">
+    <!-- SafeNutri -->
+    <div class="env-card safenurti">
+      <div class="env-icon">🍊</div>
+      <div class="env-name">SafeNutri</div>
+      <div class="env-domain">OJ Pasteurisation · Food Safety</div>
+
+      <div class="badge-row">
+        <span class="badge easy">Easy</span>
+        <span class="badge medium">Medium</span>
+        <span class="badge hard">Hard</span>
+        <span class="badge pomdp">POMDP</span>
+      </div>
+
+      <div class="env-specs">
+        <div class="spec-row">
+          <span class="spec-key">State dimensions</span>
+          <span class="spec-val">15</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Action dimensions</span>
+          <span class="spec-val">8</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Thermal model</span>
+          <span class="spec-val">Arrhenius kinetics</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Pathogen limit</span>
+          <span class="spec-val">FDA §21 CFR</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Key constraint</span>
+          <span class="spec-val">Vitamin C retention</span>
+        </div>
+      </div>
+
+      <div class="badge-row">
+        <span class="badge feature">Partial observability</span>
+        <span class="badge feature">Delayed sensors</span>
+        <span class="badge feature">Sensor noise</span>
+      </div>
+
+      <div class="env-highlight">
+        Maximise pasteurisation uniformity while preserving Vitamin C, maintaining FDA-mandated pathogen-kill requirements, and minimising energy use — all with noisy, delayed temperature readings.
+      </div>
+    </div>
+
+    <!-- MegaForge -->
+    <div class="env-card megaforge">
+      <div class="env-icon">🏭</div>
+      <div class="env-name">MegaForge</div>
+      <div class="env-domain">Blast Furnace · Primary Steelmaking</div>
+
+      <div class="badge-row">
+        <span class="badge easy">Easy</span>
+        <span class="badge medium">Medium</span>
+        <span class="badge hard">Hard</span>
+        <span class="badge pomdp">POMDP</span>
+      </div>
+
+      <div class="env-specs">
+        <div class="spec-row">
+          <span class="spec-key">State dimensions</span>
+          <span class="spec-val">18</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Action dimensions</span>
+          <span class="spec-val">10</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Carbon target</span>
+          <span class="spec-val">4.2% ± 0.05%</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Equipment value</span>
+          <span class="spec-val">$500M</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Key constraint</span>
+          <span class="spec-val">Refractory wear</span>
+        </div>
+      </div>
+
+      <div class="badge-row">
+        <span class="badge feature">Partial observability</span>
+        <span class="badge feature">Delayed sensors</span>
+        <span class="badge feature">Thermal stress</span>
+      </div>
+
+      <div class="env-highlight">
+        Control blast temperature, oxygen enrichment, and burden composition to hit tight carbon targets in molten pig iron — balancing production throughput against catastrophic refractory damage in a $500M furnace.
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ NOVEL IDEA ════════════════════════════ -->
+<section id="novel">
+  <div class="fade-up">
+    <div class="section-label">The Novel Idea</div>
+    <h2>What if they could learn from each other?</h2>
+    <p>
+      Despite appearances, orange juice processing and blast furnace steelmaking
+      share deep structural symmetry — the same underlying physics, the same
+      optimisation trade-offs, just different scales.
+    </p>
+  </div>
+
+  <div class="pull-quote fade-up">
+    <p>"Structural isomorphism: different industries, identical control problems. A policy that learns to manage thermal ramps in a pasteuriser already knows something about managing temperature in a furnace."</p>
+  </div>
+
+  <div class="iso-container fade-up">
+    <div class="iso-header">
+      <div class="iso-col-label green">🍊 SafeNutri (OJ)</div>
+      <div class="iso-col-label center">ISOMORPHISM</div>
+      <div class="iso-col-label orange" style="text-align:right">🏭 MegaForge (Steel)</div>
+    </div>
+
+    <div class="iso-row">
+      <div class="iso-cell left">Vitamin C degradation rate</div>
+      <div class="iso-arrow"><span class="arrow-animated">⟷</span></div>
+      <div class="iso-cell right">Refractory wear rate</div>
+    </div>
+    <div class="iso-row">
+      <div class="iso-cell left">Temperature ramp control</div>
+      <div class="iso-arrow"><span class="arrow-animated">⟷</span></div>
+      <div class="iso-cell right">Blast temperature control</div>
+    </div>
+    <div class="iso-row">
+      <div class="iso-cell left">FDA pathogen-kill safety limit</div>
+      <div class="iso-arrow"><span class="arrow-animated">⟷</span></div>
+      <div class="iso-cell right">Thermal stress safety limit</div>
+    </div>
+    <div class="iso-row">
+      <div class="iso-cell left">Flow rate & pressure balance</div>
+      <div class="iso-arrow"><span class="arrow-animated">⟷</span></div>
+      <div class="iso-cell right">Production throughput rate</div>
+    </div>
+    <div class="iso-row">
+      <div class="iso-cell left">Arrhenius reaction kinetics</div>
+      <div class="iso-arrow"><span class="arrow-animated">⟷</span></div>
+      <div class="iso-cell right">Blast furnace thermochemistry</div>
+    </div>
+    <div class="iso-row">
+      <div class="iso-cell left">Nutrient retention objective</div>
+      <div class="iso-arrow"><span class="arrow-animated">⟷</span></div>
+      <div class="iso-cell right">Carbon content precision</div>
+    </div>
+
+    <div class="iso-caption">
+      Both systems exhibit thermal runaway risk, delayed sensor feedback, irreversible constraint violations, and a conflicted objective between quality and throughput.
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ MEMORY ════════════════════════════════ -->
+<section id="memory">
+  <div class="fade-up">
+    <div class="section-label">CrossIndustryMemory</div>
+    <h2>Shared memory across process boundaries</h2>
+    <p>
+      The core technical contribution: an episodic→semantic memory system that
+      abstracts industrial experience into a domain-agnostic 8-dimensional state
+      space, enabling genuine knowledge transfer between unrelated manufacturing sectors.
+    </p>
+  </div>
+
+  <div class="memory-grid fade-up">
+    <div class="memory-mode">
+      <div class="memory-mode-icon">🚫</div>
+      <div class="memory-mode-name">None</div>
+      <div class="memory-mode-desc">Standard RL — no memory. Each episode starts fresh. Baseline for ablation studies.</div>
+    </div>
+    <div class="memory-mode">
+      <div class="memory-mode-icon">💾</div>
+      <div class="memory-mode-name">Local</div>
+      <div class="memory-mode-desc">Agent remembers its own past episodes. Same-domain experience only. Intra-industry transfer.</div>
+    </div>
+    <div class="memory-mode">
+      <div class="memory-mode-icon">🌐</div>
+      <div class="memory-mode-name">Cross</div>
+      <div class="memory-mode-desc">Full cross-industry memory. SafeNutri episodes inform MegaForge policy and vice versa.</div>
+    </div>
+  </div>
+
+  <div class="state-dims fade-up">
+    <h3>Abstract State Space — 8 Dimensions</h3>
+    <div class="dims-grid">
+      <span class="dim-chip">normalised_temperature</span>
+      <span class="dim-chip">rate_of_change</span>
+      <span class="dim-chip">safety_margin</span>
+      <span class="dim-chip">quality_metric</span>
+      <span class="dim-chip">throughput_rate</span>
+      <span class="dim-chip">equipment_stress</span>
+      <span class="dim-chip">energy_efficiency</span>
+      <span class="dim-chip">time_in_phase</span>
+    </div>
+  </div>
+
+  <div class="promo-flow fade-up">
+    <div class="promo-step">
+      <div class="promo-step-icon">📼</div>
+      <div class="promo-step-name">Episode Buffer</div>
+      <div class="promo-step-sub">Raw state transitions</div>
+    </div>
+    <div class="promo-arrow">→</div>
+    <div class="promo-step">
+      <div class="promo-step-icon">🔍</div>
+      <div class="promo-step-name">Difficulty Check</div>
+      <div class="promo-step-sub">Threshold gating</div>
+    </div>
+    <div class="promo-arrow">→</div>
+    <div class="promo-step">
+      <div class="promo-step-icon">🧠</div>
+      <div class="promo-step-name">Semantic Memory</div>
+      <div class="promo-step-sub">Promoted episodes</div>
+    </div>
+    <div class="promo-arrow">→</div>
+    <div class="promo-step">
+      <div class="promo-step-icon">🌡️</div>
+      <div class="promo-step-name">Confidence Warmup</div>
+      <div class="promo-step-sub">Cross-domain gate</div>
+    </div>
+    <div class="promo-arrow">→</div>
+    <div class="promo-step">
+      <div class="promo-step-icon">🎯</div>
+      <div class="promo-step-name">Policy Augmentation</div>
+      <div class="promo-step-sub">Retrieved context</div>
+    </div>
+  </div>
+
+  <div class="formula-box fade-up">
+    <div class="formula-label">Retrieval Score Formula</div>
+    <div class="formula-text">
+      score = <span class="coeff">0.7</span> × <span class="fn">cosine_similarity</span>(q, k)
+      &nbsp;+&nbsp;
+      <span class="coeff">0.3</span> × <span class="fn">confidence</span>(k)
+    </div>
+    <div style="margin-top: 0.8rem; font-size: 0.78rem; color: var(--text-dim)">
+      Memories from harder difficulty levels carry higher confidence weights.
+      Cross-industry memories are gated by a warmup scheduler to prevent premature transfer.
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ ARCHITECTURE ══════════════════════════ -->
+<section id="architecture">
+  <div class="fade-up">
+    <div class="section-label">Two-Agent Architecture</div>
+    <h2>LLM strategist + recurrent controller</h2>
+    <p>
+      A hierarchical dual-agent system where a language model acts as plant manager —
+      setting high-level strategy — and a recurrent PPO controller executes precise
+      low-level control actions in real time.
+    </p>
+  </div>
+
+  <div class="arch-diagram fade-up">
+    <div class="arch-agent">
+      <div class="arch-agent-tag">Strategic Layer</div>
+      <div class="arch-agent-name">Plant Manager</div>
+      <div class="arch-agent-model">Qwen2.5-3B (LLM)</div>
+      <div class="arch-features">
+        <div class="arch-feature">
+          <div class="arch-feature-dot"></div>
+          Generates natural-language strategy from current state context
+        </div>
+        <div class="arch-feature">
+          <div class="arch-feature-dot"></div>
+          Queries CrossIndustryMemory for analogous situations
+        </div>
+        <div class="arch-feature">
+          <div class="arch-feature-dot"></div>
+          Outputs a 4-dim <code style="color:var(--blue)">strategy_bias</code> vector
+        </div>
+        <div class="arch-feature">
+          <div class="arch-feature-dot"></div>
+          Runs every N steps (not every tick) for efficiency
+        </div>
+        <div class="arch-feature">
+          <div class="arch-feature-dot"></div>
+          Detects anomalies and flags reward-hack attempts
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-connector">
+      <div class="conn-label">strategy_bias<br/>(4-dim)</div>
+      <div class="conn-line"></div>
+      <div class="conn-arrow-right">↓</div>
+      <div style="font-size:0.68rem; color:var(--muted); text-align:center; margin-top:0.3rem">injected into<br/>observation</div>
+    </div>
+
+    <div class="arch-agent">
+      <div class="arch-agent-tag">Control Layer</div>
+      <div class="arch-agent-name">Control System</div>
+      <div class="arch-agent-model">RecurrentPPO + LSTM</div>
+      <div class="arch-features">
+        <div class="arch-feature">
+          <div class="arch-feature-dot"></div>
+          Processes augmented observation at every timestep
+        </div>
+        <div class="arch-feature">
+          <div class="arch-feature-dot"></div>
+          LSTM carries temporal context across steps
+        </div>
+        <div class="arch-feature">
+          <div class="arch-feature-dot"></div>
+          Executes physical control actions (temperature, flow, pressure)
+        </div>
+        <div class="arch-feature">
+          <div class="arch-feature-dot"></div>
+          Shaped by anti-reward-hacking penalty signals
+        </div>
+        <div class="arch-feature">
+          <div class="arch-feature-dot"></div>
+          Trained with Stable-Baselines3 RecurrentPPO
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="obs-table fade-up">
+    <table>
+      <thead>
+        <tr>
+          <th>Environment</th>
+          <th>Base Obs</th>
+          <th>Memory Context</th>
+          <th>Strategy Bias</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🍊 SafeNutri</td>
+          <td class="num">15</td>
+          <td class="num">8</td>
+          <td class="num">4</td>
+          <td class="num">27</td>
+        </tr>
+        <tr>
+          <td>🏭 MegaForge</td>
+          <td class="num">18</td>
+          <td class="num">8</td>
+          <td class="num">4</td>
+          <td class="num">30</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ ANTI-REWARD-HACKING ═══════════════════ -->
+<section id="antihack">
+  <div class="fade-up">
+    <div class="section-label">Anti-Reward-Hacking</div>
+    <h2>Flags that keep the agent honest</h2>
+    <p>
+      Industrial RL policies are uniquely dangerous: a reward-hacking agent
+      in a food factory or steel plant can cause regulatory violations, equipment
+      destruction, or public health incidents. CrossMill ships five structured
+      penalty flags.
+    </p>
+  </div>
+
+  <div class="flags-grid fade-up">
+    <div class="flag-row">
+      <span class="flag-badge orange-flag">SAFETY_WARNING</span>
+      <span class="flag-desc">Triggered when the agent approaches but has not yet violated a safety constraint — early warning system for unsafe trajectories.</span>
+    </div>
+    <div class="flag-row">
+      <span class="flag-badge red-flag">CATASTROPHIC_FAIL</span>
+      <span class="flag-desc">Hard safety constraint violated — FDA pathogen exposure, thermal runaway, or refractory breach. Immediate large penalty + episode termination.</span>
+    </div>
+    <div class="flag-row">
+      <span class="flag-badge orange-flag">QUALITY_LOW</span>
+      <span class="flag-desc">Output quality falls below threshold while safety constraints are technically satisfied — detects reward gaming through quality sacrifice.</span>
+    </div>
+    <div class="flag-row">
+      <span class="flag-badge yellow-flag">HIGH_VARIANCE</span>
+      <span class="flag-desc">Control actions exhibit implausibly high variance, characteristic of exploitation-mode policy collapse or oscillation attacks.</span>
+    </div>
+    <div class="flag-row">
+      <span class="flag-badge red-flag">COMPOUND_FAIL</span>
+      <span class="flag-desc">Multiple flags co-occur within a short window — compounded penalty captures correlated constraint violations that individual flags miss.</span>
+    </div>
+  </div>
+
+  <div class="transfer-formula fade-up">
+    <div class="f-label">Transfer Gain Formula</div>
+    <div class="f-eq">
+      transfer_gain =
+      <span class="hl-blue">(R_cross − R_none)</span>
+      &nbsp;/&nbsp;
+      <span class="hl-orange">|R_none|</span>
+    </div>
+    <div class="f-eq" style="font-size:0.85rem; color: var(--text-dim); margin-top:0.4rem">
+      where&nbsp;&nbsp;
+      <span class="hl-green">R_cross</span> = reward with cross-industry memory,&nbsp;&nbsp;
+      <span class="hl-orange">R_none</span> = baseline reward (no memory)
+    </div>
+    <div class="f-caption">
+      The primary evaluation metric — positive transfer_gain proves that cross-industry knowledge genuinely helps, not just that more training helps.
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ FOOTER ════════════════════════════════ -->
+<footer class="fade-up">
+  <div class="footer-event">
+    <span>OpenEnv AI Hackathon 2026</span> · Meta × Scaler School of Technology
+  </div>
+  <div style="font-size:0.8rem; color:var(--muted); margin-top:0.4rem">
+    Cross-industry reinforcement learning for industrial process control
+  </div>
+  <div class="footer-links">
+    <a href="https://github.com/inimay05/crossmill-integration" target="_blank" rel="noopener">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+      </svg>
+      crossmill-integration
+    </a>
+  </div>
+  <div class="footer-copy">
+    Built for OpenEnv AI Hackathon 2026 · Meta × Scaler School of Technology · Apache 2.0
+  </div>
+</footer>
+
+<!-- ═══════════════ JS ══════════════════════════════════ -->
+<script>
+  // ── Intersection Observer for fade-up animations ────────
+  const fadeEls = document.querySelectorAll('.fade-up');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        const delay = parseFloat(entry.target.style.getPropertyValue('--delay') || '0');
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, delay * 1000);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  fadeEls.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
