@@ -8,3 +8,17 @@ dist/
 build/
 .DS_Store
 .claude/
+
+# Large binary artefacts — model checkpoints go to HF Model Hub via hub_push.py
+*.zip
+*.npy
+*.pt
+*.ckpt
+
+# Training logs — not needed in the Space
+*.tfevents*
+monitor.monitor.csv
+runs/*/safenutri-easy-cross_*/
+runs/*/safenutri-medium-*/
+runs/*/megaforge-*/
+runs/grpo_llm/
