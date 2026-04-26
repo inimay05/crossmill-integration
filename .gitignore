@@ -13,4 +13,5 @@ build/
 *.zip
 *.tfevents*
 wandb/
-runs/megaforge/
+runs/megaforge/*.zip
+runs/megaforge/*.csv

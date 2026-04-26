@@ -1,0 +1,21 @@
+{
+  "env": "megaforge",
+  "task_id": "easy",
+  "memory_mode": "cross",
+  "timesteps": 5000,
+  "seed": 42,
+  "pre_score": 0.8869982628398485,
+  "post_score": 1.0,
+  "delta": 0.1130017371601515,
+  "mean_reward": 0.6023212861432767,
+  "std_reward": 0.025419042072760648,
+  "safety_violation_rate": 0.0,
+  "catastrophic_rate": 0.0,
+  "mean_vit_c_retention": null,
+  "mean_carbon_error_pct": 1.0485430665951866e-07,
+  "mean_coke_rate_kgpt": 300.0,
+  "mean_co2_emissions_kgpt": 2200.0,
+  "monitor_csv": "./runs/megaforge/monitor.monitor.csv",
+  "model_zip": "./runs/megaforge/megaforge-easy-cross-ppo.zip",
+  "curve_png": "./runs/megaforge/reward_curve_easy_cross.png"
+}
