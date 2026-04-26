@@ -152,7 +152,7 @@ class CrossMillPlatform:
         env = self.envs[env_name]
 
         response = env.step(action)
-        reward_value = response.reward.value
+        reward_value = response.reward
 
         self._episode_rewards[env_name] += reward_value
         self._episode_steps[env_name] += 1

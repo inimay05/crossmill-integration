@@ -110,7 +110,11 @@ _CSS = """
 footer { display: none !important; }
 """
 
-with gr.Blocks(title="CrossMill — Cross-Industry RL Platform") as demo:
+with gr.Blocks(
+    title="CrossMill — Cross-Industry RL Platform",
+    theme=gr.themes.Base(primary_hue="blue", neutral_hue="slate"),
+    css=_CSS,
+) as demo:
 
     gr.HTML(
         """
@@ -170,7 +174,4 @@ with gr.Blocks(title="CrossMill — Cross-Industry RL Platform") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(
-        theme=gr.themes.Base(primary_hue="blue", neutral_hue="slate"),
-        css=_CSS,
-    )
+    demo.launch()

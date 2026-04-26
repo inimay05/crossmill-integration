@@ -17,7 +17,7 @@ from crossmill.config import ENVIRONMENTS
 from crossmill.training_config import (
     GAMMA, GAE_LAMBDA, LEARNING_RATE, N_STEPS, BATCH_SIZE, N_ENVS, VERBOSE,
     DEFAULT_TIMESTEPS, PRE_GRADER_EPISODES, POST_GRADER_EPISODES,
-    LOG_DIR_TEMPLATE, ROLLING_WINDOW, PLOT_DPI,
+    LOG_DIR_TEMPLATE, ROLLING_WINDOW, PLOT_DPI, STRATEGY_DIM,
 )
 from crossmill.gym_shim import CrossMillGymShim
 from crossmill.plotting import plot_reward_curve
@@ -132,6 +132,8 @@ class LSTMPolicyAdapter:
         raw_vec = obs_to_vector(self.shim.env_name, obs)
         # Use zero bias for grader evaluation (deterministic, no memory noise)
         aug_vec = augment_observation(raw_vec, zero_bias(), self.shim.env_name)
+        # Append strategy_bias zeros to match the policy's 27/30-dim obs space
+        aug_vec = np.concatenate([aug_vec, np.zeros(STRATEGY_DIM, dtype=np.float32)])
         aug_vec = aug_vec.reshape(1, -1)
 
         action, self.lstm_states = self.model.predict(

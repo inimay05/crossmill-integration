@@ -4,7 +4,7 @@
 # Imported here so the Gym shim has one import path.
 from crossmill.config import AUGMENTED_OBS_DIM, ENVIRONMENTS
 
-POLICY_OBS_DIM = AUGMENTED_OBS_DIM   # {'safenutri': 23, 'megaforge': 26}
+POLICY_OBS_DIM = AUGMENTED_OBS_DIM   # {'safenutri': 27, 'megaforge': 30}
 
 # ---- RECURRENTPPO HYPERPARAMETERS ----
 # gamma=0.995 is non-negotiable for long-horizon POMDP credit assignment.
@@ -64,10 +64,10 @@ HIGH_VARIANCE_CV_THRESHOLD = 0.8  # std/mean above this = HIGH_VARIANCE flag
 
 if __name__ == '__main__':
     print('POLICY_OBS_DIM:', POLICY_OBS_DIM)
-    assert POLICY_OBS_DIM['safenutri'] == 23, f"Expected 23, got {POLICY_OBS_DIM['safenutri']}"
-    assert POLICY_OBS_DIM['megaforge'] == 26, f"Expected 26, got {POLICY_OBS_DIM['megaforge']}"
-    print('  safenutri =', POLICY_OBS_DIM['safenutri'], '(expected 23) OK')
-    print('  megaforge =', POLICY_OBS_DIM['megaforge'], '(expected 26) OK')
+    assert POLICY_OBS_DIM['safenutri'] == 27, f"Expected 27, got {POLICY_OBS_DIM['safenutri']}"
+    assert POLICY_OBS_DIM['megaforge'] == 30, f"Expected 30, got {POLICY_OBS_DIM['megaforge']}"
+    print('  safenutri =', POLICY_OBS_DIM['safenutri'], '(expected 27) OK')
+    print('  megaforge =', POLICY_OBS_DIM['megaforge'], '(expected 30) OK')
     print()
     print('GAMMA:', GAMMA)
     print('LEARNING_RATE:', LEARNING_RATE)
