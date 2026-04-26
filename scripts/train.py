@@ -17,7 +17,7 @@ from crossmill.config import ENVIRONMENTS
 from crossmill.training_config import (
     GAMMA, GAE_LAMBDA, LEARNING_RATE, N_STEPS, BATCH_SIZE, N_ENVS, VERBOSE,
     DEFAULT_TIMESTEPS, PRE_GRADER_EPISODES, POST_GRADER_EPISODES,
-    LOG_DIR_TEMPLATE, ROLLING_WINDOW, PLOT_DPI,
+    LOG_DIR_TEMPLATE, ROLLING_WINDOW, PLOT_DPI, STRATEGY_DIM,
 )
 from crossmill.gym_shim import CrossMillGymShim
 from crossmill.plotting import plot_reward_curve
@@ -117,6 +117,10 @@ class LSTMPolicyAdapter:
     The grader passes a Pydantic Observation model. This adapter converts it
     to the augmented numpy vector the policy expects, runs the LSTM predict,
     and returns a raw action list.
+
+    The full observation seen by the policy during training is:
+        [raw_obs (15/18) || memory_bias (8) || strategy_bias (4)] = 27/30 dims.
+    During grader evaluation we use zero bias for both memory and strategy.
     """
     def __init__(self, model: RecurrentPPO, shim: CrossMillGymShim):
         self.model = model
@@ -130,12 +134,14 @@ class LSTMPolicyAdapter:
         from crossmill.augmentation import obs_to_vector, augment_observation
         from crossmill.augmentation import zero_bias
         raw_vec = obs_to_vector(self.shim.env_name, obs)
-        # Use zero bias for grader evaluation (deterministic, no memory noise)
+        # Use zero memory bias for deterministic grader evaluation
         aug_vec = augment_observation(raw_vec, zero_bias(), self.shim.env_name)
-        aug_vec = aug_vec.reshape(1, -1)
+        # Append zero strategy_bias to match training observation size (AUGMENTED_OBS_DIM)
+        strategy_zeros = np.zeros(STRATEGY_DIM, dtype=np.float32)
+        full_vec = np.concatenate([aug_vec, strategy_zeros]).reshape(1, -1)
 
         action, self.lstm_states = self.model.predict(
-            aug_vec,
+            full_vec,
             state=self.lstm_states,
             episode_start=self.episode_starts,
             deterministic=True,
@@ -174,6 +180,13 @@ def main():
     ap.add_argument('--hf_repo_id', default=None,
                     help='HF repo ID, e.g. username/crossmill-safenutri-easy '
                          '(required if --push_to_hub)')
+    # ---- LLM Strategist flags ----
+    ap.add_argument('--llm_strategist', action='store_true', default=False,
+                    help='Run LLM strategist (SFT + GRPO) to derive strategy_bias '
+                         'before RecurrentPPO training')
+    ap.add_argument('--sft_model_path', type=str, default=None,
+                    help='Path to a pre-trained SFT LoRA adapter. If --llm_strategist '
+                         'is set and this is not provided, SFT will be run first.')
     args = ap.parse_args()
 
     # Resolve timesteps
@@ -193,13 +206,80 @@ def main():
 
     print(f'\n{"="*60}')
     print(f'CrossMill Training')
-    print(f'  env:          {args.env}')
-    print(f'  task:         {args.task}')
-    print(f'  memory_mode:  {args.memory_mode}')
-    print(f'  timesteps:    {timesteps:,}')
-    print(f'  seed:         {args.seed}')
-    print(f'  log_dir:      {log_dir}')
+    print(f'  env:            {args.env}')
+    print(f'  task:           {args.task}')
+    print(f'  memory_mode:    {args.memory_mode}')
+    print(f'  timesteps:      {timesteps:,}')
+    print(f'  seed:           {args.seed}')
+    print(f'  log_dir:        {log_dir}')
+    print(f'  llm_strategist: {args.llm_strategist}')
     print(f'{"="*60}\n')
+
+    # ---- LLM STRATEGIST (optional) ----
+    strategy_bias_vec = None   # 4-dim array or None
+
+    if args.llm_strategist:
+        from crossmill.llm_strategist import (
+            train_sft, save_sft_model,
+            build_grpo_dataset, multi_component_reward_fn, grpo_train,
+            extract_strategy_bias, save_strategy_bias,
+            _ensure_reward_platform,
+        )
+
+        llm_dir = os.path.join(log_dir, 'grpo_llm')
+        bias_path = os.path.join(llm_dir, 'strategy_bias.npy')
+
+        # -- Load or train SFT model --
+        if args.sft_model_path:
+            print(f'\n=== LLM STRATEGIST: Loading SFT model from {args.sft_model_path} ===')
+            from transformers import AutoModelForCausalLM, AutoTokenizer
+            from peft import PeftModel
+            tokenizer = AutoTokenizer.from_pretrained(args.sft_model_path)
+            base = AutoModelForCausalLM.from_pretrained(
+                args.sft_model_path, device_map='auto'
+            )
+            llm_model = base
+            llm_tokenizer = tokenizer
+        else:
+            print('\n=== LLM STRATEGIST: Running SFT warmup ===')
+            sft_dir = os.path.join(llm_dir, 'sft')
+            llm_model, llm_tokenizer = train_sft(
+                env_name=args.env,
+                n_examples=20,
+                output_dir=sft_dir,
+            )
+            save_sft_model(llm_model, llm_tokenizer, sft_dir)
+
+        # -- GRPO training --
+        print('\n=== LLM STRATEGIST: Running GRPO training (50 steps) ===')
+        _ensure_reward_platform(args.env, args.task)
+        grpo_dataset = build_grpo_dataset(args.env, args.task, n=50)
+        grpo_train(
+            model=llm_model,
+            tokenizer=llm_tokenizer,
+            dataset=grpo_dataset,
+            reward_fn=multi_component_reward_fn,
+            output_dir=llm_dir,
+            num_steps=50,
+            env_name=args.env,
+            task_id=args.task,
+        )
+
+        # -- Extract and save strategy bias --
+        print('\n=== LLM STRATEGIST: Extracting strategy bias ===')
+        strategy_bias_vec = extract_strategy_bias(
+            llm_model, llm_tokenizer, args.env, n_queries=10
+        )
+        save_strategy_bias(strategy_bias_vec, bias_path)
+        print(f'  strategy_bias = {strategy_bias_vec}')
+
+        # Clean up GPU memory before PPO training
+        try:
+            import torch
+            del llm_model
+            torch.cuda.empty_cache()
+        except Exception:
+            pass
 
     # ---- PRE-TRAINING BASELINE ----
     print('=== PRE-TRAINING BASELINE (heuristic agent) ===')
@@ -208,18 +288,21 @@ def main():
     print(f'  mean_reward:  {pre["mean_reward"]:.3f}')
 
     # ---- BUILD TRAINING ENVIRONMENT ----
-    def make_env():
+    def make_env(bias=None):
         def _init():
-            return CrossMillGymShim(
+            shim = CrossMillGymShim(
                 env_name=args.env,
                 task_id=args.task,
                 memory_mode=args.memory_mode,
                 seed=args.seed,
             )
+            if bias is not None:
+                shim.update_strategy(bias)
+            return shim
         return _init
 
     monitor_path = os.path.join(log_dir, 'monitor')
-    vec = DummyVecEnv([make_env() for _ in range(N_ENVS)])
+    vec = DummyVecEnv([make_env(bias=strategy_bias_vec) for _ in range(N_ENVS)])
     vec = VecMonitor(vec, filename=monitor_path)
 
     # ---- TRAIN RecurrentPPO ----
@@ -349,6 +432,9 @@ def main():
         'monitor_csv':  csv_path if os.path.exists(csv_path) else None,
         'model_zip':    model_zip_path,
         'curve_png':    curve_png_path if os.path.exists(curve_png_path) else None,
+        # ---- LLM strategist (if used) ----
+        'llm_strategist':  args.llm_strategist,
+        'strategy_bias':   strategy_bias_vec.tolist() if strategy_bias_vec is not None else None,
     }
     summary_path = os.path.join(
         log_dir, f'summary_{args.task}_{args.memory_mode}.json'

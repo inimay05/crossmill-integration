@@ -99,8 +99,10 @@ class CrossMillGymShim(gym.Env):
         terminated = bool(result['done'] and not result['truncated'])
         truncated  = bool(result['truncated'])
         info       = result['info']
-        self._last_obs = obs
-        return obs, reward, terminated, truncated, info
+        # Append strategy_bias so step() obs matches observation_space (AUGMENTED_OBS_DIM)
+        augmented = np.concatenate([obs, self.strategy_bias]).astype(np.float32)
+        self._last_obs = augmented
+        return augmented, reward, terminated, truncated, info
 
     def update_strategy(self, strategy_bias):
         self.strategy_bias = np.clip(
@@ -119,8 +121,9 @@ class CrossMillGymShim(gym.Env):
 if __name__ == '__main__':
     rng = np.random.default_rng(42)
 
-    for env_name, exp_obs, exp_act in [('safenutri', (23,), (8,)),
-                                        ('megaforge',  (26,), (10,))]:
+    # AUGMENTED_OBS_DIM = 27/30 (platform 23/26 + strategy_bias 4)
+    for env_name, exp_obs, exp_act in [('safenutri', (27,), (8,)),
+                                        ('megaforge',  (30,), (10,))]:
         env = CrossMillGymShim(env_name, task_id='easy', memory_mode='none', seed=42)
 
         assert env.observation_space.shape == exp_obs, (
@@ -153,4 +156,4 @@ if __name__ == '__main__':
 
         env.close()
 
-    print('CrossMillGymShim OK: safenutri (23,8) and megaforge (26,10)')
+    print('CrossMillGymShim OK: safenutri (27,8) and megaforge (30,10)')

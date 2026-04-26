@@ -152,7 +152,9 @@ class CrossMillPlatform:
         env = self.envs[env_name]
 
         response = env.step(action)
-        reward_value = response.reward.value
+        # Environment may return reward as a plain float or as an object with .value
+        _raw_reward = response.reward
+        reward_value = _raw_reward.value if hasattr(_raw_reward, 'value') else float(_raw_reward)
 
         self._episode_rewards[env_name] += reward_value
         self._episode_steps[env_name] += 1
