@@ -5,14 +5,16 @@ import os
 from pathlib import Path
 
 import gradio as gr
-import pandas as pd
 
 
 # ── helpers ────────────────────────────────────────────────
 
+_HERE = Path(__file__).parent
+
+
 def _load_story_html() -> str:
     """Return an iframe embedding crossmill_story.html via base64 data URI."""
-    path = Path("crossmill_story.html")
+    path = _HERE / "crossmill_story.html"
     if not path.exists():
         return (
             '<div style="padding:2rem;text-align:center;color:#7F8C9B;">'
@@ -34,15 +36,18 @@ def _normalise_path(raw: str) -> str:
     return raw.replace("\\", "/")
 
 
-def _load_results() -> tuple[pd.DataFrame | None, list[str]]:
-    """
-    Scan runs/*/summary_*.json and return (DataFrame, list_of_curve_paths).
-    Returns (None, []) when no summary files exist yet.
-    """
-    summary_files = sorted(glob.glob("runs/*/summary_*.json"))
-    if not summary_files:
-        return None, []
+_COLUMNS = [
+    "Environment", "Task", "Mode", "Timesteps",
+    "Pre Score", "Post Score", "Delta", "Transfer Gain", "Mean Reward",
+]
 
+
+def _load_results() -> tuple[list[dict], list[str]]:
+    """
+    Scan runs/*/summary_*.json and return (rows, list_of_curve_paths).
+    Returns ([], []) when no summary files exist yet.
+    """
+    summary_files = sorted(glob.glob(str(_HERE / "runs" / "*" / "summary_*.json")))
     rows: list[dict] = []
     curves: list[str] = []
 
@@ -68,8 +73,8 @@ def _load_results() -> tuple[pd.DataFrame | None, list[str]]:
                 "Task":          d.get("task_id", "—").title(),
                 "Mode":          d.get("memory_mode", "—"),
                 "Timesteps":     d.get("timesteps", "—"),
-                "Pre Score":     f"{pre:.4f}"   if pre   is not None else "—",
-                "Post Score":    f"{post:.4f}"  if post  is not None else "—",
+                "Pre Score":     f"{pre:.4f}"    if pre   is not None else "—",
+                "Post Score":    f"{post:.4f}"   if post  is not None else "—",
                 "Delta":         f"{delta:+.4f}" if delta is not None else "—",
                 "Transfer Gain": tg,
                 "Mean Reward":   f"{d['mean_reward']:.4f}" if d.get("mean_reward") is not None else "—",
@@ -79,18 +84,47 @@ def _load_results() -> tuple[pd.DataFrame | None, list[str]]:
         raw_curve = d.get("curve_png", "")
         if raw_curve:
             curve = _normalise_path(raw_curve)
-            if os.path.exists(curve):
-                curves.append(curve)
+            abs_curve = curve if os.path.isabs(curve) else str(_HERE / curve)
+            if os.path.exists(abs_curve):
+                curves.append(abs_curve)
 
-    if not rows:
-        return None, []
+    return rows, curves
 
-    return pd.DataFrame(rows), curves
+
+def _build_table_html(rows: list[dict]) -> str:
+    th_style = (
+        "padding:10px 14px;text-align:left;font-weight:600;"
+        "font-size:0.82rem;color:#9AABB8;border-bottom:1px solid #2A3340;"
+        "white-space:nowrap;"
+    )
+    td_style = (
+        "padding:10px 14px;font-size:0.85rem;color:#E0E8EF;"
+        "border-bottom:1px solid #1E2830;white-space:nowrap;"
+    )
+    header = "".join(f'<th style="{th_style}">{c}</th>' for c in _COLUMNS)
+    body = ""
+    for i, row in enumerate(rows):
+        bg = "#141C24" if i % 2 == 0 else "#111820"
+        cells = "".join(
+            f'<td style="{td_style}background:{bg};">{row[c]}</td>'
+            for c in _COLUMNS
+        )
+        body += f"<tr>{cells}</tr>"
+    return (
+        '<div style="overflow-x:auto;border-radius:8px;'
+        'border:1px solid #2A3340;margin-bottom:1.5rem;">'
+        '<table style="width:100%;border-collapse:collapse;'
+        'font-family:Inter,system-ui,sans-serif;">'
+        f"<thead><tr>{header}</tr></thead>"
+        f"<tbody>{body}</tbody>"
+        "</table></div>"
+    )
 
 
 # ── load once at startup ────────────────────────────────────
 _STORY_HTML  = _load_story_html()
-_RESULTS_DF, _CURVES = _load_results()
+_RESULTS_ROWS, _CURVES = _load_results()
+_RESULTS_TABLE = _build_table_html(_RESULTS_ROWS) if _RESULTS_ROWS else None
 
 _RESULTS_PLACEHOLDER = (
     '<div style="padding:2.5rem;text-align:center;'
@@ -139,20 +173,17 @@ with gr.Blocks(title="CrossMill — Cross-Industry RL Platform") as demo:
         # ── Tab 2: results dashboard ───────────────────────
         with gr.Tab("📊  Results Dashboard"):
 
-            if _RESULTS_DF is None:
+            if _RESULTS_TABLE is None:
                 gr.HTML(_RESULTS_PLACEHOLDER)
 
             else:
                 gr.HTML(
                     '<h3 style="font-family:Inter,sans-serif;'
                     'margin:1rem 0 0.4rem;font-size:1rem;">'
-                    "Training Results</h3>"
-                )
-                gr.Dataframe(
-                    value=_RESULTS_DF,
-                    label=None,
-                    interactive=False,
-                    wrap=True,
+                    f"Training Results &nbsp;<span style='font-weight:400;"
+                    f"color:#7F8C9B;font-size:0.8rem;'>"
+                    f"({len(_RESULTS_ROWS)} environment{'s' if len(_RESULTS_ROWS)!=1 else ''})</span></h3>"
+                    + _RESULTS_TABLE
                 )
 
                 if _CURVES:
@@ -170,7 +201,4 @@ with gr.Blocks(title="CrossMill — Cross-Industry RL Platform") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(
-        theme=gr.themes.Base(primary_hue="blue", neutral_hue="slate"),
-        css=_CSS,
-    )
+    demo.launch(server_name="0.0.0.0", server_port=7860, share=True)
