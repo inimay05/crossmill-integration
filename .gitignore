@@ -1,4 +1,8 @@
 venv/
+.gradio/
+runs/
+*.pkl
+*.npy
 __pycache__/
 *.pyc
 *.pyo

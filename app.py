@@ -14,7 +14,7 @@ _HERE = Path(__file__).parent
 
 def _load_story_html() -> str:
     """Return an iframe embedding crossmill_story.html via base64 data URI."""
-    path = _HERE / "crossmill_story.html"
+    path = _HERE / "docs" / "crossmill_story.html"
     if not path.exists():
         return (
             '<div style="padding:2rem;text-align:center;color:#7F8C9B;">'
@@ -201,4 +201,4 @@ with gr.Blocks(title="CrossMill — Cross-Industry RL Platform") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860, share=True)
+    demo.launch(server_name="0.0.0.0", server_port=7860)
